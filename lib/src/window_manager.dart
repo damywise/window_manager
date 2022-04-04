@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -205,6 +206,8 @@ class WindowManager {
       'isFullScreen': isFullScreen,
     };
     await _channel.invokeMethod('setFullScreen', arguments);
+    if (!isFullScreen && Platform.isWindows)
+      await _channel.invokeMethod('setFullScreen', arguments);
   }
 
   /// This will make a window maintain an aspect ratio.

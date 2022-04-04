@@ -178,8 +178,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       _EmitEvent("blur");
     }
 
-    if (window_manager->title_bar_style_ == "hidden")
-      return 1;
+    return 1;
   } else if (message == WM_EXITSIZEMOVE) {
     if (window_manager->is_resizing_) {
       _EmitEvent("resized");
@@ -189,6 +188,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
       _EmitEvent("moved");
       window_manager->is_moving_ = false;
     }
+    window_manager->ForceChildRefresh();
     return false;
   } else if (message == WM_MOVING) {
     window_manager->is_moving_ = true;
@@ -301,6 +301,12 @@ void WindowManagerPlugin::HandleMethodCall(
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("waitUntilReadyToShow") == 0) {
     window_manager->WaitUntilReadyToShow();
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("forceRefresh") == 0) {
+    window_manager->ForceRefresh();
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("forceChildRefresh") == 0) {
+    window_manager->ForceChildRefresh();
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("setAsFrameless") == 0) {
     window_manager->SetAsFrameless();
