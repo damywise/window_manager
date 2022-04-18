@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../resize_edge.dart';
@@ -35,6 +37,9 @@ class DragToResizeArea extends StatelessWidget {
         cursor: cursor,
         child: GestureDetector(
           onPanStart: (_) => windowManager.startResizing(resizeEdge),
+          onDoubleTap: () => Platform.isWindows
+              ? windowManager.startResizing(resizeEdge, true)
+              : null,
         ),
       ),
     );
