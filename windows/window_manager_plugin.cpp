@@ -272,6 +272,7 @@ std::optional<LRESULT> WindowManagerPlugin::HandleWindowProc(HWND hWnd,
     } else if (wParam == SIZE_MINIMIZED) {
       _EmitEvent("minimize");
       window_manager->last_state = STATE_MINIMIZED;
+      return 0;
     } else if (wParam == SIZE_RESTORED) {
       if (window_manager->last_state == STATE_MAXIMIZED) {
         _EmitEvent("unmaximize");
@@ -469,6 +470,11 @@ void WindowManagerPlugin::HandleMethodCall(
     const flutter::EncodableMap& args =
         std::get<flutter::EncodableMap>(*method_call.arguments());
     window_manager->SetProgressBar(args);
+    result->Success(flutter::EncodableValue(true));
+  } else if (method_name.compare("setIcon") == 0) {
+    const flutter::EncodableMap& args =
+        std::get<flutter::EncodableMap>(*method_call.arguments());
+    window_manager->SetIcon(args);
     result->Success(flutter::EncodableValue(true));
   } else if (method_name.compare("hasShadow") == 0) {
     bool value = window_manager->HasShadow();

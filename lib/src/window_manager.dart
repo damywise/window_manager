@@ -5,10 +5,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 import 'resize_edge.dart';
 import 'title_bar_style.dart';
 import 'window_listener.dart';
+import 'window_options.dart';
 
 const kWindowEventClose = 'close';
 const kWindowEventFocus = 'focus';
@@ -94,8 +96,39 @@ class WindowManager {
     await _channel.invokeMethod('setAsFrameless');
   }
 
-  Future<void> waitUntilReadyToShow() async {
+  /// Wait until ready to show.
+  Future<void> waitUntilReadyToShow([
+    WindowOptions? options,
+    VoidCallback? callback,
+  ]) async {
     await _channel.invokeMethod('waitUntilReadyToShow');
+
+    bool _isFullScreen = await isFullScreen();
+    bool _isMaximized = await isMaximized();
+    bool _isMinimized = await isMinimized();
+
+    if (_isFullScreen) await setFullScreen(false);
+    if (_isMaximized) await unmaximize();
+    if (_isMinimized) await restore();
+
+    if (options?.size != null) await setSize(options!.size!);
+    if (options?.center == true) await setAlignment(Alignment.center);
+    if (options?.minimumSize != null)
+      await setMinimumSize(options!.minimumSize!);
+    if (options?.maximumSize != null)
+      await setMaximumSize(options!.maximumSize!);
+    if (options?.alwaysOnTop != null)
+      await setAlwaysOnTop(options!.alwaysOnTop!);
+    if (options?.fullScreen != null) await setFullScreen(options!.fullScreen!);
+    if (options?.skipTaskbar != null)
+      await setSkipTaskbar(options!.skipTaskbar!);
+    if (options?.title != null) await setTitle(options!.title!);
+    if (options?.titleBarStyle != null)
+      await setTitleBarStyle(options!.titleBarStyle!);
+
+    if (callback != null) {
+      callback();
+    }
   }
 
   /// Force closing the window.
@@ -543,6 +576,21 @@ class WindowManager {
       'progress': progress,
     };
     await _channel.invokeMethod('setProgressBar', arguments);
+  }
+
+  /// Sets window/taskbar icon.
+  ///
+  /// @platforms windows
+  Future<void> setIcon(String iconPath) async {
+    final Map<String, dynamic> arguments = {
+      'iconPath': path.joinAll([
+        path.dirname(Platform.resolvedExecutable),
+        'data/flutter_assets',
+        iconPath,
+      ]),
+    };
+
+    await _channel.invokeMethod('setIcon', arguments);
   }
 
   /// Returns `bool` - Whether the window has a shadow. On Windows, always returns true unless window is frameless.
