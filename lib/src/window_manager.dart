@@ -272,7 +272,7 @@ class WindowManager {
   /// Resizes and moves the window to the supplied bounds.
   Future<void> setBounds(Rect bounds, {animate = false}) async {
     await setPosition(bounds.topLeft);
-    await setSize(bounds.size);
+    await setSize(bounds.size, animate: animate);
   }
 
   /// Returns `Offset` - Contains the window's current position.
@@ -646,6 +646,11 @@ class WindowManager {
       'forward': forward,
     };
     await _channel.invokeMethod('setIgnoreMouseEvents', arguments);
+  }
+
+  Future<void> popUpWindowMenu() async {
+    final Map<String, dynamic> arguments = {};
+    await _channel.invokeMethod('popUpWindowMenu', arguments);
   }
 
   /// Starts a window drag based on the specified mouse-down event.
